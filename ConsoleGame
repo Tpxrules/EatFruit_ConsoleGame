@@ -1,0 +1,126 @@
+#include <iostream>
+#include <thread>
+#include <windows.h> //for handles
+#include <conio.h>
+using namespace std;
+int x = 4, y = 4, dir = 1, score = 0;
+bool loser = false;
+int timer = 300;
+int sound = 500;
+//treats.
+int tx, ty;
+int mapsize = 13;
+HANDLE  hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+void render() {
+	system("cls");
+	SetConsoleTextAttribute(hConsole, 7);
+	cout << "score: " << score << " - movement (WASD)\n";
+	for (int i = 0; i < mapsize; i++)
+	{
+		if (i != x and i != tx) {
+			SetConsoleTextAttribute(hConsole, 16 * 4 + 4);
+			for (int j = 0; j < mapsize; j++)
+				cout << "00";
+		}
+		else {
+
+			for (int j = 0; j < mapsize; j++)
+			{
+				if (i == x and j == y)
+					SetConsoleTextAttribute(hConsole, 16 * 7 + 7);
+				else 	if (i == tx and j == ty)
+					SetConsoleTextAttribute(hConsole, 0);
+				else
+					SetConsoleTextAttribute(hConsole, 16 * 4 + 4);
+				cout << "00";
+			}
+		}
+		SetConsoleTextAttribute(hConsole, 0);
+		cout << " " << endl;
+	}
+}
+void controls() {
+	while (loser == false) {
+		if (_kbhit) {
+			switch (_getch())
+			{
+			case 'w':
+				dir = 1;
+				break;
+			case 'a':
+				dir = 2;
+				break;
+			case 's':
+				dir = 3;
+				break;
+			case 'd':
+				dir = 4;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
+
+
+int main()
+{
+	system("pause");
+	system("cls");
+	tx = rand() % mapsize;
+	ty = rand() % mapsize;
+	thread worker(controls);
+	while (loser == false) {
+		switch (dir)
+		{
+		case 1:
+			if (x > 0)
+				x--;
+			else {
+				loser = true;
+			}
+			break;
+		case 2:
+			if (y > 0)
+				y--;
+			else {
+				loser = true;
+			}
+			break;
+		case 3:
+			if (x < mapsize - 1)
+				x++;
+			else {
+				loser = true;
+			}
+			break;
+		case 4:
+			if (y < mapsize - 1)
+				y++;
+			else {
+				loser = true;
+			}
+			break;
+		default:
+			break;
+		}
+		if (x == tx and y == ty) {
+			Beep(sound, 200);
+			if (timer > 25) {
+				timer = timer - 25;
+				sound = sound + 100;
+			}
+
+			score++;
+			tx = rand() % mapsize;
+			ty = rand() % mapsize;
+		}
+		render();
+		this_thread::sleep_for(chrono::milliseconds(timer));
+	}
+	SetConsoleTextAttribute(hConsole, 4);
+	cout << "\n YOU LOST!";
+	return 0;
+}
+
